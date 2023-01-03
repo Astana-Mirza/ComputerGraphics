@@ -27,7 +27,7 @@ GLFWGuard::~GLFWGuard()
 void init_glew()
 {
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK)
+	if (glewInit() != GLEW_OK || !GLEW_VERSION_3_3)
 	{
 		throw std::runtime_error{ "Failed to initialize GLEW" };
 	}

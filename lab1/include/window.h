@@ -20,12 +20,19 @@ public:
 	GLFWwindow* get_handle() const;
 
 	void clear();
+	void draw(GLenum mode);
 	void display();
 	void register_key_callback(KeyCallback callback);
 	void handle_events();
 
 private:
+	void compile_shaders();
+	void prepare_vao();
+
+private:
 	GLFWwindow* window_;
+	GLuint shader_program_;
+	GLuint vao_id_;
 };
 
 #endif // #ifndef _CG_WINDOW_H
