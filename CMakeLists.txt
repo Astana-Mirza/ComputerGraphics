@@ -16,18 +16,43 @@ endmacro()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
     cmake_policy(SET CMP0135 NEW)
+    cmake_policy(SET CMP0077 NEW)
 endif()
 
 # Set build options
 set_option(USE_GLEW ON BOOL "Build project with GLEW")
-set_option(USE_GLFW ON BOOL "Build project with GLFW")
+set_option(USE_FLTK ON BOOL "Build project with FLTK")
+set_option(USE_GLFW OFF BOOL "Build project with GLFW")
+set_option(USE_GLAD OFF BOOL "Build project with GLAD")
+set_option(USE_OLD_OPENGL OFF BOOL "Build project with old OpenGL (older than 3.3)")
+
 set_option(BUILD_LAB1 ON BOOL "Build lab1")
 
+set(BUILD_SHARED_LIBS OFF)
+
 if (${USE_GLEW})
-    set(BUILD_SHARED_LIBS OFF)
     add_compile_definitions(GLEW_STATIC)
 endif()
 
+if (${USE_FLTK})
+    set(FLTK_BUILD_FLUID OFF)
+    set(FLTK_BUILD_TEST OFF)
+    set(OPTION_USE_SVG OFF)
+    set(OPTION_USE_WAYLAND OFF)
+    set(OPTION_PRINT_SUPPORT OFF)
+    set(OPTION_BUILD_HTML_DOCUMENTATION OFF)
+    set(OPTION_BUILD_PDF_DOCUMENTATION OFF)
+
+    FetchContent_Declare(
+        FLTK
+        GIT_REPOSITORY https://github.com/fltk/fltk
+        GIT_TAG 3600522ae7d2244b69552458e4d82f869a36067b # release-1.3.8
+    )
+    FetchContent_MakeAvailable(FLTK)
+    set(FLTK_INCLUDE_DIRS ${fltk_SOURCE_DIR} ${fltk_BINARY_DIR})
+    set(FLTK_LINK_DIRS ${fltk_BINARY_DIR}/lib)
+    set(FLTK_LIBRARIES fltk)
+endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # For OpenGL we need to install libraries:
     # libx11-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev
@@ -35,6 +60,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # libxi-dev
     # For GLEW: libglew-dev
     # For GLFW: libglfw3-dev libglfw3
+
     set(OPENGL_LIBRARY ${OPENGL_LIBRARY} ${CMAKE_DL_LIBS} GL GLU Xrandr Xext X11 rt)
     if(${USE_GLEW})
         set(GLEW_LIBRARIES GLEW)
@@ -76,17 +102,16 @@ elseif (WIN32)
     endif()
 endif()
 
-set(ALL_LIBS ${OPENGL_LIBRARY} ${GLEW_LIBRARIES} ${GLFW_LIBRARIES})
-set(LINK_DIRS ${GLEW_LINK_DIRS} ${GLFW_LINK_DIRS})
-set(INCLUDE_DIRS ${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
+set(COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/common)
+
+set(ALL_LIBS ${OPENGL_LIBRARY} ${GLEW_LIBRARIES} ${GLFW_LIBRARIES} ${FLTK_LIBRARIES})
+set(LINK_DIRS ${GLEW_LINK_DIRS} ${GLFW_LINK_DIRS} ${FLTK_LINK_DIRS})
+set(INCLUDE_DIRS ${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${COMMON_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${FLTK_INCLUDE_DIRS})
+
+set_directory_properties(PROPERTIES COMPILE_DEFINITIONS SHOW_MESSAGE=1)
+
+configure_file(${COMMON_DIR}/cg_config.h.in cg_config.h)
 
 if (${BUILD_LAB1})
-    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS SHOW_MESSAGE=1)
-    add_subdirectory(lab1)
-    if (${USE_GLEW})
-        add_dependencies(lab1 glew_s)
-    endif()
-    if (${USE_GLFW})
-        add_dependencies(lab1 glfw)
-    endif()
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab1)
 endif()

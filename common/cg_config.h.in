@@ -1,0 +1,9 @@
+#cmakedefine USE_OLD_OPENGL
+
+// select OpenGL extensions loader
+#cmakedefine USE_GLEW
+#cmakedefine USE_GLAD
+
+// select window or GUI framework
+#cmakedefine USE_GLFW
+#cmakedefine USE_FLTK

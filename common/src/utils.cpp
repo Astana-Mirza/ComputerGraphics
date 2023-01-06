@@ -1,10 +1,8 @@
-#include <common.h>
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <common/utils.h>
 
 #include <stdexcept>
 
+#if defined(USE_GLFW)
 
 GLFWGuard::GLFWGuard()
 {
@@ -23,12 +21,18 @@ GLFWGuard::~GLFWGuard()
 	glfwTerminate();
 }
 
+#endif // USE_GLFW
+
+
+#if defined(USE_GLEW)
 
 void init_glew()
 {
-	glewExperimental = GL_TRUE;
+	// glewExperimental = GL_TRUE;    // not needed since GLEW 2.0.0
 	if (glewInit() != GLEW_OK || !GLEW_VERSION_3_3)
 	{
 		throw std::runtime_error{ "Failed to initialize GLEW" };
 	}
 }
+
+#endif // USE_GLEW

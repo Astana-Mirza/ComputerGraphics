@@ -3,8 +3,6 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_executable (lab1
 	"${SRC_DIR}/main.cpp"
-	"${SRC_DIR}/window.cpp"
-	"${SRC_DIR}/common.cpp"
 )
 
 target_include_directories(lab1 PRIVATE ${INCLUDE_DIRS} ${INCLUDE_DIR})
