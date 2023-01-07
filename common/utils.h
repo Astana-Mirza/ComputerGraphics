@@ -1,6 +1,8 @@
 #ifndef _CG_UTILS_H
 #define _CG_UTILS_H
 
+#include <cg_config.h>
+
 #if defined(USE_GLAD)
 #   include <glad/glad.h>
 #elif defined(USE_GLEW)

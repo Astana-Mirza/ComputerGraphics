@@ -1,5 +1,9 @@
 ﻿#include <common/utils.h>
 
+#include <common/ui/main_window.h>
+#include <cstdlib>
+#include <ctime>
+
 namespace
 {
 
@@ -20,6 +24,8 @@ static constexpr GLenum modes[] = {
 
 int main()
 {
-	return 0;
+	std::srand(std::time(nullptr));
+	MainWindow window(800, 600, "Computer Graphics");
+	window.show();
+	return Fl::run();
 }
-

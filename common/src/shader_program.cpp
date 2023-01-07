@@ -81,7 +81,8 @@ void ShaderProgram::set_uniform(const std::string& uniform_name, float value) co
 GLuint ShaderProgram::attach_shader(const std::string& shader_source, GLuint shader_type) const
 {
 	GLuint shader_id = glCreateShader(shader_type);
-	glShaderSource(shader_id, 1, shader_source.c_str(), nullptr);
+	const char *source_c_str = shader_source.c_str();
+	glShaderSource(shader_id, 1, &source_c_str, nullptr);
 	glCompileShader(shader_id);
 	glAttachShader(program_id_, shader_id);
 	return shader_id;
