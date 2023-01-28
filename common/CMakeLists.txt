@@ -6,7 +6,7 @@ add_library(common
 	"${SRC_DIR}/shader_program.cpp"
 	"${SRC_DIR}/utils.cpp"
 	"${UI_DIR}/gl_window.cpp"
-	"${UI_DIR}/main_window.cpp"
+	"${UI_DIR}/controls.cpp"
 )
 
 target_include_directories(common PRIVATE ${INCLUDE_DIRS} ${INCLUDE_DIR})

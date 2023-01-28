@@ -1,6 +1,9 @@
 ﻿#include <common/utils.h>
 
 #include <common/ui/main_window.h>
+#include <common/ui/controls.h>
+
+#include <FL/Fl_Box.h>
 #include <cstdlib>
 #include <ctime>
 
@@ -24,8 +27,11 @@ static constexpr GLenum modes[] = {
 
 int main()
 {
-	std::srand(std::time(nullptr));
-	MainWindow window(800, 600, "Computer Graphics");
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	MainWindow<GLWindow> window(800, 600, "Computer Graphics");
+
+	spawn_background_control(window);
+
 	window.show();
 	return Fl::run();
 }

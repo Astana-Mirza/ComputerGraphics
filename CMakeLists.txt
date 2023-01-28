@@ -51,7 +51,7 @@ if (${USE_FLTK})
     FetchContent_MakeAvailable(FLTK)
     set(FLTK_INCLUDE_DIRS ${fltk_SOURCE_DIR} ${fltk_BINARY_DIR})
     set(FLTK_LINK_DIRS ${fltk_BINARY_DIR}/lib)
-    set(FLTK_LIBRARIES fltk)
+    set(FLTK_LIBRARIES fltk fltk_gl)
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # For OpenGL we need to install libraries:
