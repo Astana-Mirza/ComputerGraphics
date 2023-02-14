@@ -29,7 +29,7 @@ private:
 
 template <typename T>
 MainWindow<T>::MainWindow(int width, int height, const char* title) :
-	Fl_Window(width, height, title), gl_window{ new T(500, 500) }
+	Fl_Window(width, height, title), gl_window{ new T(800, 600) }
 {
 	add(gl_window);
 	gl_window->show();
