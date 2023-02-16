@@ -42,7 +42,7 @@ ShaderProgram::ShaderProgram(const std::string& vertex_shader,
 }
 
 
-ShaderProgram::ShaderProgram(ShaderProgram&& other):
+ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept:
 	program_id_{ 0 }
 {
 	std::swap(other.program_id_, program_id_);

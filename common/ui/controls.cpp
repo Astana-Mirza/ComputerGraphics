@@ -28,9 +28,9 @@ void callback_select_color(Fl_Widget *caller, void *data)
 }
 
 
-void spawn_background_control(MainWindow<GLWindow>& window)
+void spawn_background_control(MainWindow<GLWindow>& window, int x, int y)
 {
-	Fl_Button* select_button = new Fl_Button(510, 10, 280, 50, "Background color");
+	Fl_Button* select_button = new Fl_Button(x, y, 220, 30, "Background color");
 	select_button->callback(callback_select_color, &window);
-	window.add(select_button);
+	window.get_scroll()->add(select_button);
 }

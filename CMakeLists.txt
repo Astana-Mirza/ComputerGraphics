@@ -26,7 +26,7 @@ set_option(USE_GLFW OFF BOOL "Build project with GLFW")
 set_option(USE_GLAD OFF BOOL "Build project with GLAD")
 set_option(USE_OLD_OPENGL OFF BOOL "Build project with old OpenGL (older than 3.0)")
 
-set_option(BUILD_LAB1 ON BOOL "Build lab1")
+set_option(BUILD_LAB1_2 ON BOOL "Build lab1 and lab2")
 
 set(BUILD_SHARED_LIBS OFF)
 
@@ -114,6 +114,6 @@ configure_file(${COMMON_DIR}/cg_config.h.in cg_config.h)
 add_subdirectory(${COMMON_DIR})
 set(ALL_LIBS ${ALL_LIBS} common)
 
-if (${BUILD_LAB1})
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab1)
+if (${BUILD_LAB1_2})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab1-2)
 endif()

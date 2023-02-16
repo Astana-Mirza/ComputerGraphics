@@ -23,7 +23,7 @@ public:
 				  const std::string& fragment_shader);
 
 	// move only
-	ShaderProgram(ShaderProgram&&);
+	ShaderProgram(ShaderProgram&&) noexcept;
 	ShaderProgram(const ShaderProgram&) = delete;
 
 	~ShaderProgram();
