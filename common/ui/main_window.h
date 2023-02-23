@@ -32,7 +32,7 @@ private:
 
 template <typename T>
 MainWindow<T>::MainWindow(int width, int height, const char* title) :
-	Fl_Window(width, height, title), gl_window{ new T(800, 600) }, scroll{ new Fl_Scroll(width-250, 0, 250, height) }
+	Fl_Window(width, height, title), gl_window{ new T(width - 250, height) }, scroll{ new Fl_Scroll(width-250, 0, 250, height) }
 {
 	add(gl_window);
 	add(scroll);

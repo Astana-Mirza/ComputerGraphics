@@ -5,8 +5,6 @@
 #include <FL/Fl_Hor_Slider.H>
 #include <FL/Fl_Box.H>
 
-#include <iostream>
-
 namespace // callbacks
 {
 
