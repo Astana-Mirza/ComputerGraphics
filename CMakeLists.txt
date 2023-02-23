@@ -24,16 +24,26 @@ set_option(USE_GLEW ON BOOL "Build project with GLEW")
 set_option(USE_FLTK ON BOOL "Build project with FLTK")
 set_option(USE_GLFW OFF BOOL "Build project with GLFW")
 set_option(USE_GLAD OFF BOOL "Build project with GLAD")
+set_option(USE_GLM ON BOOL "Build project with glm")
 set_option(USE_OLD_OPENGL OFF BOOL "Build project with old OpenGL (older than 3.0)")
 
 set_option(BUILD_LAB1_2 ON BOOL "Build lab1 and lab2")
+set_option(BUILD_LAB3 ON BOOL "Build lab3")
 
 set(BUILD_SHARED_LIBS OFF)
 
 if (${USE_GLEW})
+    FetchContent_Declare(
+        GLM
+        GIT_REPOSITORY https://github.com/g-truc/glm
+        GIT_TAG bf71a83 # release-0.9.9.8
+    )
+    FetchContent_MakeAvailable(GLM)
+    set(GLM_INCLUDE_DIRS ${FETCHCONTENT_BASE_DIR}/glm-src)
+endif()
+if (${USE_GLEW})
     add_compile_definitions(GLEW_STATIC)
 endif()
-
 if (${USE_FLTK})
     set(FLTK_BUILD_FLUID OFF)
     set(FLTK_BUILD_TEST OFF)
@@ -107,7 +117,7 @@ set(COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/common)
 
 set(ALL_LIBS ${OPENGL_LIBRARY} ${GLEW_LIBRARIES} ${GLFW_LIBRARIES} ${FLTK_LIBRARIES})
 set(LINK_DIRS ${GLEW_LINK_DIRS} ${GLFW_LINK_DIRS} ${FLTK_LINK_DIRS})
-set(INCLUDE_DIRS ${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${FLTK_INCLUDE_DIRS})
+set(INCLUDE_DIRS ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${FLTK_INCLUDE_DIRS})
 
 configure_file(${COMMON_DIR}/cg_config.h.in cg_config.h)
 
@@ -116,4 +126,7 @@ set(ALL_LIBS ${ALL_LIBS} common)
 
 if (${BUILD_LAB1_2})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab1-2)
+endif()
+if (${BUILD_LAB3})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab3)
 endif()
