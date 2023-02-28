@@ -12,7 +12,7 @@
 namespace // callbacks
 {
 
-static int fractal_iter_count = 1;
+static int fractal_iter_count = 2;
 static const glm::vec4 fractal_start_point{ 0, 0, 0, 0 };
 static constexpr float fractal_color[] = { 0.68f, 0.80f, 0.99f };
 static bool draw_spiral = false;
@@ -47,7 +47,7 @@ void spiral(glm::vec4 a, glm::vec4 b, glm::vec4 c, bool reverse = false)
 
 	std::vector<glm::vec2> v[4];
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)	// отрисовка четырёхугольников внутри основного, каждый поворачивается относительно предыдущего
 	{
 		dir1 = glm::rotate(glm::mat4(1.0f), glm::radians(-6.0f + i / 5.f), glm::vec3(0.0, 0.0, 1.0)) * dir1 * 1.1f;
 		dir2 = glm::rotate(glm::mat4(1.0f), glm::radians(-6.0f + i / 5.f), glm::vec3(0.0, 0.0, 1.0)) * dir2 * 1.1f;
@@ -62,7 +62,7 @@ void spiral(glm::vec4 a, glm::vec4 b, glm::vec4 c, bool reverse = false)
 		v[2].push_back({point_60_deg.x, point_60_deg.y});
 		v[3].push_back({point_120_deg.x, point_120_deg.y});
 
-		glColor3f(fractal_color[0] / 2, fractal_color[1] / 2, fractal_color[2] / 2);
+		glColor3f(fractal_color[0] / 2, fractal_color[1] / 2, fractal_color[2] / 2);	// более тусклый цвет
 		glBegin(GL_LINE_LOOP);
 			glVertex2f(b.x, b.y);
 			glVertex2f(a.x, a.y);
@@ -71,7 +71,7 @@ void spiral(glm::vec4 a, glm::vec4 b, glm::vec4 c, bool reverse = false)
 		glEnd();
 	}
 
-	glColor3f(fractal_color[0], fractal_color[1], fractal_color[2]);
+	glColor3f(fractal_color[0], fractal_color[1], fractal_color[2]);	// отрисовка обводки контура спирали
 	for (int i = 0; i < 4; i++)
 	{
 		glBegin(GL_LINE_STRIP);
@@ -119,7 +119,7 @@ void spawn_count_control(MainWindow<GLWindow>& window, int x, int y)
 {
 	Fl_Spinner* spinner = new Fl_Spinner(x+150, y, 70, 30, "Depth of recursion  ");
 	spinner->type(FL_INT_INPUT);
-	spinner->minimum(2);
+	spinner->minimum(1);
 	spinner->maximum(10);
 	spinner->value(2);
 	spinner->callback(callback_count_control, &window);
