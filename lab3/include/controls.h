@@ -7,6 +7,7 @@
 #include <glm/vec4.hpp>
 
 void spawn_count_control(MainWindow<GLWindow>& window, int x, int y);
+void spawn_spiral_control(MainWindow<GLWindow>& window, int x, int y);
 void draw();
 
 #endif

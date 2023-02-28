@@ -10,6 +10,7 @@ int main()
 
 	spawn_background_control(window, 810, 10);
 	spawn_count_control(window, 810, 50);
+	spawn_spiral_control(window, 810, 90);
 	window.get_gl_window()->set_draw_function(draw);
 
 	window.show();
