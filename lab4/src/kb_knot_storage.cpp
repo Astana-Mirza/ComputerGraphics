@@ -131,8 +131,10 @@ bool KBKnotStorage::start_drag(const glm::vec2& pos)
 
 void KBKnotStorage::drag_to(const glm::vec2& pos)
 {
-	assert(drag && selected_knots.size() == 1);
-	knots[*selected_knots.begin()].pos = pos;
+	if (drag && selected_knots.size() == 1)
+	{
+		knots[*selected_knots.begin()].pos = pos;
+	}
 }
 
 
