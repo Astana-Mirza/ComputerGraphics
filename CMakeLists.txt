@@ -29,6 +29,7 @@ set_option(USE_OLD_OPENGL OFF BOOL "Build project with old OpenGL (older than 3.
 
 set_option(BUILD_LAB1_2 ON BOOL "Build lab1 and lab2")
 set_option(BUILD_LAB3 ON BOOL "Build lab3")
+set_option(BUILD_LAB4 ON BOOL "Build lab4")
 
 set(BUILD_SHARED_LIBS OFF)
 
@@ -129,4 +130,7 @@ if (${BUILD_LAB1_2})
 endif()
 if (${BUILD_LAB3})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab3)
+endif()
+if (${BUILD_LAB4})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lab4)
 endif()
