@@ -33,11 +33,11 @@ void KBKnotStorage::draw_spline()
 	for (int i = 1; i < knots.size()-1; i++)			// расчёт значений производных
 	{													// на основе параметров tension, bias, continuity
 		std::pair<glm::vec2, glm::vec2> knot_der;
-		glm::vec2 g1 = (knots[i].pos - knots[i-1].pos) * (1 - knots[i].bias);
-		glm::vec2 g2 = (knots[i+1].pos - knots[i].pos) * (1 + knots[i].bias);
+		glm::vec2 g1 = (knots[i].pos - knots[i-1].pos) * (1 + knots[i].bias);
+		glm::vec2 g2 = (knots[i+1].pos - knots[i].pos) * (1 - knots[i].bias);
 		glm::vec2 g3 = g2 - g1;
-		knot_der.first  = (1 - knots[i].tension) * (g1 + 0.5f * g3 * (1 - knots[i].continuity));
-		knot_der.second = (1 - knots[i].tension) * (g1 + 0.5f * g3 * (1 + knots[i].continuity));
+		knot_der.first  = (1 - knots[i].tension) * (g1 + 0.5f * g3 * (1 + knots[i].continuity));
+		knot_der.second = (1 - knots[i].tension) * (g1 + 0.5f * g3 * (1 - knots[i].continuity));
 		derivatives[i] = knot_der;
 	}
 	// обработка отдельного случая - для первой и последней точек
