@@ -26,6 +26,9 @@ public:
 	ShaderProgram(ShaderProgram&&) noexcept;
 	ShaderProgram(const ShaderProgram&) = delete;
 
+	ShaderProgram& operator=(ShaderProgram&& rhs) noexcept;
+	ShaderProgram& operator=(const ShaderProgram& rhs) = delete;
+
 	~ShaderProgram();
 
 	void use() const;

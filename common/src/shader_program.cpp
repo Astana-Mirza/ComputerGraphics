@@ -49,6 +49,16 @@ ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept:
 }
 
 
+ShaderProgram& ShaderProgram::operator=(ShaderProgram&& rhs) noexcept
+{
+	if (this != &rhs)
+	{
+		std::swap(rhs.program_id_, program_id_);
+	}
+	return *this;
+}
+
+
 ShaderProgram::~ShaderProgram()
 {
 	if (program_id_)
