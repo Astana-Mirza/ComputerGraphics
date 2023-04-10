@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include <glm/mat4x4.hpp>
+
 class ShaderProgram
 {
 public:
@@ -34,6 +36,7 @@ public:
 	void use() const;
 
 	void set_uniform(const std::string& uniform_name, float value) const;
+	void set_uniform(const std::string& uniform_name, const glm::mat4& value) const;
 
 private:
 	GLuint attach_shader(const std::string& shader_source, GLuint shader_type) const;
