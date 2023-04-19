@@ -4,6 +4,7 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_library(common
 	"${SRC_DIR}/shader_program.cpp"
+	"${SRC_DIR}/camera.cpp"
 	"${SRC_DIR}/utils.cpp"
 	"${UI_DIR}/gl_window.cpp"
 	"${UI_DIR}/controls.cpp"

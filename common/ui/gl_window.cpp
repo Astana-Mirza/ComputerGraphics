@@ -40,7 +40,7 @@ void GLWindow::draw()
 		glViewport(0, 0, pixel_w(), pixel_h());
 	}
 	glClearColor(background_color.r, background_color.g, background_color.b, background_color.a);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (draw_function)
 	{
 		draw_function();
