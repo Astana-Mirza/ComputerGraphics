@@ -9,7 +9,8 @@ int main()
 	MainWindow<GLWindow> window(1050, 800, "Computer Graphics");
 
 	spawn_background_control(window, 810, 10);
-	spawn_material_control(window, 810, 60);
+	spawn_projection_control(window, 810, 60);
+	spawn_material_control(window, 810, 150);
 	window.get_gl_window()->set_draw_function(draw);
 	window.get_gl_window()->set_input_handle_function(handle);
 	window.show();

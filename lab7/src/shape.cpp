@@ -1,4 +1,5 @@
 #include <shape.h>
+#include <common/shader_program.h>
 
 #include <FL/Fl_PNG_Image.H>
 
@@ -90,8 +91,9 @@ void Shape::load_texture(const std::string& path)
 }
 
 
-void Shape::draw()
+void Shape::draw(ShaderProgram& shader)
 {
+	shader.set_uniform("model", model_transform);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glDrawElements(draw_mode, index_count, GL_UNSIGNED_INT, 0);

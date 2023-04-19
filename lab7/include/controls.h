@@ -5,6 +5,7 @@
 #include <common/ui/gl_window.h>
 
 void spawn_material_control(MainWindow<GLWindow>& window, int x, int y);
+void spawn_projection_control(MainWindow<GLWindow>& window, int x, int y);
 
 int handle(int event, GLWindow& window);
 void timeout_callback(void* arg);

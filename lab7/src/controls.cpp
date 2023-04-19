@@ -11,6 +11,7 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Spinner.H>
 #include <FL/Fl_Native_File_Chooser.H>
+#include <Fl/Fl_Menu_Button.H>
 #include <FL/Fl_Button.H>
 
 #include <vertex.h>
@@ -86,6 +87,22 @@ const std::string fragment_shader = R"(
 namespace // functions
 {
 
+void callback_select_projection(Fl_Widget* caller, void* data)
+{
+	MainWindow<GLWindow>* window = static_cast<MainWindow<GLWindow>*>(data);
+	Fl_Menu_Button* choice = static_cast<Fl_Menu_Button*>(caller);
+	if (choice->value())
+	{
+		shader.set_uniform("projection", glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 0.1f, 100.0f));
+	}
+	else
+	{
+		shader.set_uniform("projection", glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f));
+	}
+	choice->label(choice->text());
+}
+
+
 void callback_select_shape(Fl_Widget* caller, void* data)
 {
 	MainWindow<GLWindow>* window = static_cast<MainWindow<GLWindow>*>(data);
@@ -121,17 +138,30 @@ void spawn_material_control(MainWindow<GLWindow>& window, int x, int y)
 	Fl_Spinner* spinner = new Fl_Spinner(x + 150, y + 30, 70, 30, "Shape number:   ");
 	Fl_Button* select_button = new Fl_Button(x, y + 80, 220, 30, "Select texture");
 
+	material_label->labelfont(FL_BOLD);
 	spinner->type(FL_INT_INPUT);
 	spinner->minimum(1);
 	spinner->maximum(shape_count);
 	spinner->value(1);
 	spinner->callback(callback_select_shape, &window);
-
 	select_button->callback(callback_select_texture, &window);
 
 	window.get_scroll()->add(select_button);
 	window.get_scroll()->add(material_label);
 	window.get_scroll()->add(spinner);
+}
+
+
+void spawn_projection_control(MainWindow<GLWindow>& window, int x, int y)
+{
+	Fl_Box* projection_label = new Fl_Box(x, y, 220, 20, "Projection");
+	Fl_Menu_Button* choice = new Fl_Menu_Button(x, y + 30, 220, 30, "Perspective");
+	projection_label->labelfont(FL_BOLD);
+	choice->add("Perspective");
+	choice->add("Orthographic");
+	choice->callback(callback_select_projection, &window);
+	window.get_scroll()->add(projection_label);
+	window.get_scroll()->add(choice);
 }
 
 
@@ -264,7 +294,6 @@ void draw_init()
 	shader.set_uniform("tex", 0);
 	shader.set_uniform("projection", glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f));
 	shader.set_uniform("view", movement::camera.get_look_at_matr());
-	shader.set_uniform("model", glm::mat4(1.0f));
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -273,7 +302,7 @@ void draw()
 {
 	for (Shape& shape : shapes)
 	{
-		shape.draw();
+		shape.draw(shader);
 	}
 }
 
