@@ -37,9 +37,8 @@ Camera camera;
 namespace // data
 {
 
-static constexpr GLuint shape_count = 1;
+static constexpr GLuint shape_count = 4;
 
-GLuint vao;
 GLuint ebo;
 GLuint current_shape = 0;
 std::vector<Shape> shapes;
@@ -251,43 +250,61 @@ void timeout_callback(void* arg)
 
 void draw_init()
 {
-	static constexpr GLfloat a[] = { 0.5f, 1.0f, 1.0f, 1.0f };
-	static constexpr GLfloat b[] = { 0.25f, 1.0f, 1.0f, 1.0f };
-	static constexpr GLfloat c[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	static constexpr GLfloat d[] = { 0.09f, 0.0f, 0.0f, 0.0f };
+	static constexpr GLfloat a[] = { 0.5f, 0.2f, 0.8f, 0.0f };
+	static constexpr GLfloat b[] = { 0.4f, 0.0f, 1.0f, 0.0f };
+	static constexpr GLfloat c[] = { 0.1f, 0.1f, 0.6f, 1.0f };
+	static constexpr GLfloat d[] = { 3.0f, 2.0f, 5.0f, 0.98f };
+	static const glm::mat4 models[] = {
+		{0.5f, 0.0f, 0.0f, 0.0f,
+		 0.0f, 0.5f, 0.0f, 0.0f,
+		 0.0f, 0.0f, 0.5f, 0.0f,
+		 0.5f, 0.5f, 0.5f, 1.0f},
 
+		glm::rotate(glm::mat4{
+		 0.5f, 0.0f, 0.0f, 0.0f,
+		 0.0f, 0.5f, 0.0f, 0.0f,
+		 0.0f, 0.0f, 0.5f, 0.0f,
+		-0.7f, 0.0f, 0.2f, 1.0f},
+		glm::radians(60.0f), {1.0f, 0.0f, 0.2f}),
+		
+		{0.1f, 0.0f, 0.0f, 0.0f,
+		 0.0f, 0.5f, 0.0f, 0.0f,
+		 0.0f, 0.0f, 0.1f, 0.0f,
+		-0.2f, 0.3f, 0.5f, 1.0f},
+		
+		{0.3f, 0.0f, 0.0f, 0.0f,
+		 0.0f, 0.4f, 0.0f, 0.0f,
+		 0.0f, 0.0f, 0.3f, 0.0f,
+		 0.0f, 0.1f, -0.7f, 1.0f}
+	};
+
+	GLuint vao[shape_count];
 	GLuint vbo[shape_count];
 	GLuint texture[shape_count];
-
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &ebo);
-	glGenBuffers(shape_count, vbo);
-
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	std::vector<GLuint> indices = Shape::generate_indices();
+
+	glGenBuffers(1, &ebo);				// общий EBO для всех фигур
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+	glGenVertexArrays(shape_count, vao);
+	glGenBuffers(shape_count, vbo);
 	glGenTextures(shape_count, texture);
 
 	for (GLuint i = 0; i < shape_count; i++)
 	{
 		Shape shape;
-		shape.vao = vao;
+		shape.model_transform = models[i];
+		shape.vao = vao[i];
 		shape.ebo = ebo;
 		shape.vbo = vbo[i];
 		shape.texture = texture[i];
 		shape.index_count = static_cast<GLuint>(indices.size());
+
 		shape.generate_vertices(a[i], b[i], c[i], d[i]);
 		shape.load_texture();
 		shapes.push_back(shape);
 	}
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);  // position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));  // normal
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(2 * sizeof(glm::vec3)));  // texture_coords
-	glEnableVertexAttribArray(2);
 
 	shader = std::move(ShaderProgram(vertex_shader, fragment_shader));
 	shader.use();
@@ -309,10 +326,10 @@ void draw()
 
 void draw_deinit()
 {
-	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &ebo);
 	for (Shape& shape : shapes)
 	{
+		glDeleteVertexArrays(1, &shape.vao);
 		glDeleteBuffers(1, &shape.vbo);
 		glDeleteTextures(1, &shape.texture);
 	}

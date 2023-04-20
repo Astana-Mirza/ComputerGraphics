@@ -27,7 +27,7 @@ void Shape::generate_vertices(float a, float b, float c, float d)
 	constexpr GLfloat radius_step = pi / circle_count;
 
 	std::vector<GLfloat> circle_params;
-	GLfloat t = 0;
+	GLfloat t = radius_step;
 	for (GLuint i = 0; i < circle_count; i++)							// расчёт радиусов окружностей
 	{
 		circle_params.push_back(a * std::cos(b * t) + c * std::sin(d * t));
@@ -43,7 +43,7 @@ void Shape::generate_vertices(float a, float b, float c, float d)
 		{
 			Vertex vertex{
 				glm::vec3{ circle_params[i] * std::cos(angle), y, circle_params[i] * std::sin(angle) },
-				glm::vec3{/* normal */},
+				glm::vec3{},
 				glm::vec2{ static_cast<GLfloat>(j) / vertices_per_circle, static_cast<GLfloat>(i) / circle_count }
 			};
 			vertices.push_back(vertex);
@@ -51,8 +51,28 @@ void Shape::generate_vertices(float a, float b, float c, float d)
 		}
 		y += circle_offset;
 	}
+
+	for (GLuint i = 0; i < circle_count; i++)
+	{
+		for (GLuint j = 0; j < vertices_per_circle; j++)
+		{
+			Vertex& v = vertices[i * vertices_per_circle + j];
+			v.normal = { glm::cross(
+				vertices[i * vertices_per_circle + (j + 1) % vertices_per_circle].position - v.position,
+				vertices[(i + (i == circle_count-1 ? -1 : 1)) * vertices_per_circle + j].position - v.position
+			) };
+		}
+	}
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);  // position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));  // normal
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(2 * sizeof(glm::vec3)));  // texture_coords
+	glEnableVertexAttribArray(2);
 }
 
 
@@ -94,7 +114,7 @@ void Shape::load_texture(const std::string& path)
 void Shape::draw(ShaderProgram& shader)
 {
 	shader.set_uniform("model", model_transform);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindVertexArray(vao);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glDrawElements(draw_mode, index_count, GL_UNSIGNED_INT, 0);
 }
