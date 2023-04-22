@@ -125,6 +125,18 @@ void ShaderProgram::set_uniform(const std::string& uniform_name, const glm::vec3
 }
 
 
+void ShaderProgram::set_uniform(const std::string& uniform_name, const glm::vec4& value) const
+{
+	use();
+	GLuint location = glGetUniformLocation(program_id_, uniform_name.c_str());
+	if (location == -1)
+	{
+		throw std::runtime_error{ "cannot find uniform: " + uniform_name };
+	}
+	glUniform4fv(location, 1, &value[0]);
+}
+
+
 GLuint ShaderProgram::attach_shader(const std::string& shader_source, GLuint shader_type) const
 {
 	GLuint shader_id = glCreateShader(shader_type);

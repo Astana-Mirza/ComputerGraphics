@@ -13,9 +13,12 @@
 #include <FL/Fl_Native_File_Chooser.H>
 #include <Fl/Fl_Menu_Button.H>
 #include <FL/Fl_Button.H>
+#include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Color_Chooser.H> 
 
-#include <vertex.h>
 #include <shape.h>
+#include <light.h>
+#include <callbacks.h>
 
 #include <cmath>
 #include <chrono>
@@ -34,87 +37,140 @@ Camera camera;
 
 } // namespace movement
 
-namespace // data
-{
-
 static constexpr GLuint shape_count = 4;
 
 GLuint ebo;
 GLuint current_shape = 0;
 std::vector<Shape> shapes;
 ShaderProgram shader;
+Light light;
 
 #include <shape_shader.vs>
 #include <shape_shader.fs>
-
-} // data
-
-
-namespace // functions
-{
-
-void callback_select_projection(Fl_Widget* caller, void* data)
-{
-	MainWindow<GLWindow>* window = static_cast<MainWindow<GLWindow>*>(data);
-	Fl_Menu_Button* choice = static_cast<Fl_Menu_Button*>(caller);
-	if (choice->value())
-	{
-		shader.set_uniform("projection", glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 0.1f, 100.0f));
-	}
-	else
-	{
-		shader.set_uniform("projection", glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f));
-	}
-	choice->label(choice->text());
-}
-
-
-void callback_select_shape(Fl_Widget* caller, void* data)
-{
-	MainWindow<GLWindow>* window = static_cast<MainWindow<GLWindow>*>(data);
-	Fl_Spinner* spinner = static_cast<Fl_Spinner*>(caller);
-	current_shape = spinner->value() - 1;
-}
-
-
-void callback_select_texture(Fl_Widget* caller, void* data)
-{
-	Fl_Native_File_Chooser chooser;
-	chooser.title("Select texture image");
-	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.filter("PNG image\t*.png\n");
-
-	int ret = chooser.show();
-	if (ret != 1 && ret != -1)
-	{
-		shapes[current_shape].load_texture(chooser.filename());
-	}
-//	else if (ret == 1)
-//	{
-//		shapes[current_shape].load_texture();
-//	}
-}
-
-} // functions
-
 
 void spawn_material_control(MainWindow<GLWindow>& window, int x, int y)
 {
 	Fl_Box* material_label = new Fl_Box(x, y, 220, 20, "Material settings");
 	Fl_Spinner* spinner = new Fl_Spinner(x + 150, y + 30, 70, 30, "Shape number:   ");
-	Fl_Button* select_button = new Fl_Button(x, y + 80, 220, 30, "Select texture");
+	Fl_Button* select_button = new Fl_Button(x, y + 70, 220, 30, "Select texture");
+	Fl_Button* diffuse_button = new Fl_Button(x, y + 110, 220, 30, "Diffuse and Ambient color");
+	Fl_Button* specular_button = new Fl_Button(x, y + 150, 220, 30, "Specular color");
+	Fl_Hor_Slider* shininess_slider = new Fl_Hor_Slider(x, y + 190, 220, 20, "Shininess");
+	Fl_Hor_Slider* amb_strength_slider = new Fl_Hor_Slider(x, y + 230, 220, 20, "Ambient strength");
 
 	material_label->labelfont(FL_BOLD);
 	spinner->type(FL_INT_INPUT);
 	spinner->minimum(1);
 	spinner->maximum(shape_count);
 	spinner->value(1);
+	shininess_slider->value(128.0);
+	shininess_slider->bounds(0, 256);
+	amb_strength_slider->value(0.2);
+	amb_strength_slider->bounds(0.0001, 1);
+
 	spinner->callback(callback_select_shape, &window);
 	select_button->callback(callback_select_texture, &window);
+	diffuse_button->callback(callback_select_diffuse, &window);
+	specular_button->callback(callback_select_specular, &window);
+	shininess_slider->callback(callback_select_shininess, &window);
+	amb_strength_slider->callback(callback_select_amb_strength, &window);
 
-	window.get_scroll()->add(select_button);
 	window.get_scroll()->add(material_label);
+	window.get_scroll()->add(select_button);
 	window.get_scroll()->add(spinner);
+	window.get_scroll()->add(diffuse_button);
+	window.get_scroll()->add(specular_button);
+	window.get_scroll()->add(shininess_slider);
+	window.get_scroll()->add(amb_strength_slider);
+}
+
+
+void spawn_light_control(MainWindow<GLWindow>& window, int x, int y)
+{
+	Fl_Box* light_label = new Fl_Box(x, y, 220, 20, "Light settings");
+	Fl_Button* ambient_button = new Fl_Button(x, y + 30, 220, 30, "Ambient color");
+	Fl_Button* diffuse_button = new Fl_Button(x, y + 70, 220, 30, "Diffuse color");
+	Fl_Button* specular_button = new Fl_Button(x, y + 110, 220, 30, "Specular color");
+	Fl_Spinner* spinner_dir_x = new Fl_Spinner(x + 60, y + 150, 50, 30, "Direction:");
+	Fl_Spinner* spinner_dir_y = new Fl_Spinner(x + 115, y + 150, 50, 30);
+	Fl_Spinner* spinner_dir_z = new Fl_Spinner(x + 170, y + 150, 50, 30);
+	Fl_Check_Button* check_direct = new Fl_Check_Button(x + 50, y + 190, 50, 30, "  Is Directional Light");
+	Fl_Hor_Slider* spinner_pos_x = new Fl_Hor_Slider(x, y + 230, 220, 15, "Position X");
+	Fl_Hor_Slider* spinner_pos_y = new Fl_Hor_Slider(x, y + 270, 220, 15, "Position Y");
+	Fl_Hor_Slider* spinner_pos_z = new Fl_Hor_Slider(x, y + 310, 220, 15, "Position Z");
+	Fl_Spinner* spinner_att_x = new Fl_Spinner(x + 60, y + 350, 50, 30, "Atten.: ");
+	Fl_Spinner* spinner_att_y = new Fl_Spinner(x + 115, y + 350, 50, 30);
+	Fl_Spinner* spinner_att_z = new Fl_Spinner(x + 170, y + 350, 50, 30);
+	Fl_Hor_Slider* cut_off_slider = new Fl_Hor_Slider(x, y + 390, 220, 15, "Cut Offset");
+	Fl_Hor_Slider* outer_cut_off_slider = new Fl_Hor_Slider(x, y + 430, 220, 15, "Outer Cut Offset");
+	Fl_Box* padding_up = new Fl_Box(x, 0, 220, 1);
+	Fl_Box* padding_down = new Fl_Box(x, y + 470, 220, 1);
+
+	light_label->labelfont(FL_BOLD);
+	spinner_dir_x->minimum(-1);          spinner_dir_x->maximum(1.0001);
+	spinner_dir_y->minimum(-1);          spinner_dir_y->maximum(1.0001);
+	spinner_dir_z->minimum(-1);          spinner_dir_z->maximum(1.0001);
+	spinner_dir_x->type(FL_FLOAT_INPUT); spinner_dir_x->step(0.1);
+	spinner_dir_y->type(FL_FLOAT_INPUT); spinner_dir_y->step(0.1);
+	spinner_dir_z->type(FL_FLOAT_INPUT); spinner_dir_z->step(0.1);
+	spinner_dir_x->value(light.direction.x);
+	spinner_dir_y->value(light.direction.y);
+	spinner_dir_z->value(light.direction.z);
+	check_direct->value(light.position.w == 0.0f);
+	spinner_pos_x->bounds(-1, 1);
+	spinner_pos_y->bounds(-1, 1);
+	spinner_pos_z->bounds(-1, 1);
+	spinner_pos_x->value(light.position.x);
+	spinner_pos_y->value(light.position.y);
+	spinner_pos_z->value(light.position.z);
+	spinner_att_x->minimum(0.5);        spinner_att_x->maximum(1.0001);
+	spinner_att_y->minimum(0);          spinner_att_y->maximum(1.0001);
+	spinner_att_z->minimum(0);          spinner_att_z->maximum(1.0001);
+	spinner_att_x->type(FL_FLOAT_INPUT); spinner_att_x->step(0.001);
+	spinner_att_y->type(FL_FLOAT_INPUT); spinner_att_y->step(0.001);
+	spinner_att_z->type(FL_FLOAT_INPUT); spinner_att_z->step(0.001);
+	spinner_att_x->value(light.atten_params.x);
+	spinner_att_y->value(light.atten_params.y);
+	spinner_att_z->value(light.atten_params.z);
+	cut_off_slider->value(0);
+	cut_off_slider->bounds(0, 1);
+	outer_cut_off_slider->value(0);
+	outer_cut_off_slider->bounds(0, 1);
+
+	ambient_button->callback(callback_light_select_ambient, &window);
+	diffuse_button->callback(callback_light_select_diffuse, &window);
+	specular_button->callback(callback_light_select_specular, &window);
+	spinner_dir_x->callback(callback_light_select_direction_x, &window);
+	spinner_dir_y->callback(callback_light_select_direction_y, &window);
+	spinner_dir_z->callback(callback_light_select_direction_z, &window);
+	check_direct->callback(callback_light_select_directional, &window);
+	spinner_pos_x->callback(callback_light_select_position_x, &window);
+	spinner_pos_y->callback(callback_light_select_position_y, &window);
+	spinner_pos_z->callback(callback_light_select_position_z, &window);
+	spinner_att_x->callback(callback_light_select_att_x, &window);
+	spinner_att_y->callback(callback_light_select_att_y, &window);
+	spinner_att_z->callback(callback_light_select_att_z, &window);
+	cut_off_slider->callback(callback_light_select_cut_off, &window);
+	outer_cut_off_slider->callback(callback_light_select_outer_cut_off, &window);
+
+	window.get_scroll()->add(light_label);
+	window.get_scroll()->add(ambient_button);
+	window.get_scroll()->add(diffuse_button);
+	window.get_scroll()->add(specular_button);
+	window.get_scroll()->add(spinner_dir_x);
+	window.get_scroll()->add(spinner_dir_y);
+	window.get_scroll()->add(spinner_dir_z);
+	window.get_scroll()->add(check_direct);
+	window.get_scroll()->add(spinner_pos_x);
+	window.get_scroll()->add(spinner_pos_y);
+	window.get_scroll()->add(spinner_pos_z);
+	window.get_scroll()->add(spinner_att_x);
+	window.get_scroll()->add(spinner_att_y);
+	window.get_scroll()->add(spinner_att_z);
+	window.get_scroll()->add(cut_off_slider);
+	window.get_scroll()->add(outer_cut_off_slider);
+	window.get_scroll()->add(padding_up);
+	window.get_scroll()->add(padding_down);
 }
 
 
@@ -234,12 +290,12 @@ void draw_init()
 		 0.0f, 0.0f, 0.5f, 0.0f,
 		-0.7f, 0.0f, 0.2f, 1.0f},
 		glm::radians(60.0f), {1.0f, 0.0f, 0.2f}),
-		
+
 		{0.1f, 0.0f, 0.0f, 0.0f,
 		 0.0f, 0.5f, 0.0f, 0.0f,
 		 0.0f, 0.0f, 0.1f, 0.0f,
 		-0.2f, 0.3f, 0.5f, 1.0f},
-		
+
 		{0.3f, 0.0f, 0.0f, 0.0f,
 		 0.0f, 0.4f, 0.0f, 0.0f,
 		 0.0f, 0.0f, 0.3f, 0.0f,
@@ -282,14 +338,7 @@ void draw_init()
 	shader.set_uniform("view", movement::camera.get_look_at_matr());
 	shader.set_uniform("camera_pos", movement::camera.get_position());
 
-	shader.set_uniform("light.position", glm::vec4(0.4f, 0.2f, 0.3f, 0.0f));
-	shader.set_uniform("light.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader.set_uniform("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-	shader.set_uniform("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader.set_uniform("light.atten_params", glm::vec3(1.0f, 0.007f, 0.0002f));
-	shader.set_uniform("light.direction", glm::vec3(1.0f, 0.0f, 0.0f));
-	shader.set_uniform("light.cut_off", 0.0f);
-	shader.set_uniform("light.outer_cut_off", 0.0f);
+	light.apply_settings(shader);
 	glEnable(GL_DEPTH_TEST);
 }
 

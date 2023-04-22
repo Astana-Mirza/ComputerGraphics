@@ -11,14 +11,14 @@ const std::string fragment_shader = R"(
 
 	struct Light
 	{
-		vec4 position;			// mandatory, w = 0 for directional light, w = 1 for other
-		vec3 ambient;			// mandatory
-		vec3 diffuse;			// mandatory
-		vec3 specular;			// mandatory
-		vec3 atten_params;		// for point light and spotlight
-		vec3 direction;			// only for spotlight
-		float cut_off;			// only for spotlight, 0 if point light
-		float outer_cut_off;	// only for spotlight
+		vec4 position;
+		vec3 ambient;
+		vec3 diffuse;
+		vec3 specular;
+		vec3 atten_params;
+		vec3 direction;
+		float cut_off;
+		float outer_cut_off;
 	};
 
 	in vec3 normal;
@@ -37,7 +37,11 @@ const std::string fragment_shader = R"(
 		float attenuation = 1.0;
 		vec3 ambient = light.ambient * material.diffuse * material.amb_strength;
 
-		vec3 light_dir = normalize(vec3(light.position) - fragment_pos);
+		vec3 light_dir = normalize(-light.direction);;
+		if (light.position.w > 0.0)
+		{
+			light_dir = normalize(vec3(light.position) - fragment_pos);
+		}
 		vec3 diffuse = light.diffuse * max(dot(normal, light_dir), 0.0) * material.diffuse;
 
 		vec3 view_dir = normalize(camera_pos - fragment_pos);
@@ -48,7 +52,7 @@ const std::string fragment_shader = R"(
 
 		vec3 specular = light.specular * spec * material.specular;
 
-		if (light.position.w != 1.0)
+		if (light.position.w > 0.0)
 		{
 			if (light.cut_off > 0.0)
 			{
