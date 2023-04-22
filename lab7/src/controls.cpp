@@ -44,41 +44,8 @@ GLuint current_shape = 0;
 std::vector<Shape> shapes;
 ShaderProgram shader;
 
-const std::string vertex_shader = R"(
-	#version 330 core
-	layout (location = 0) in vec3 in_pos;
-	layout (location = 1) in vec3 in_normal;
-	layout (location = 2) in vec2 in_texture_pos;
-
-	out vec3 normal;
-	out vec2 texture_pos;
-
-	uniform mat4 model;
-	uniform mat4 view;
-	uniform mat4 projection;
-
-	void main()
-	{
-		gl_Position = projection * view * model * vec4(in_pos, 1.0);
-		normal = in_normal;
-		texture_pos = in_texture_pos;
-	}
-)";
-
-const std::string fragment_shader = R"(
-	#version 330 core
-	in vec3 normal;
-	in vec2 texture_pos;
-
-	out vec4 out_color;
-
-	uniform sampler2D tex;
-
-	void main()
-	{
-	    out_color = texture(tex, texture_pos);
-	} 
-)";
+#include <shape_shader.vs>
+#include <shape_shader.fs>
 
 } // data
 
@@ -242,6 +209,7 @@ void timeout_callback(void* arg)
 							 + up * movement::move_direction.z) * movement::speed);
 	}
 	shader.set_uniform("view", movement::camera.get_look_at_matr());
+	shader.set_uniform("camera_pos", movement::camera.get_position());
 	static_cast<MainWindow<GLWindow>*>(arg)->get_gl_window()->redraw();
 	Fl::repeat_timeout(1.0 / 60, timeout_callback, arg);
 	movement::last_update_time = now;
@@ -253,7 +221,7 @@ void draw_init()
 	static constexpr GLfloat a[] = { 0.5f, 0.2f, 0.8f, 0.0f };
 	static constexpr GLfloat b[] = { 0.4f, 0.0f, 1.0f, 0.0f };
 	static constexpr GLfloat c[] = { 0.1f, 0.1f, 0.6f, 1.0f };
-	static constexpr GLfloat d[] = { 3.0f, 2.0f, 5.0f, 0.98f };
+	static constexpr GLfloat d[] = { 3.0f, 2.0f, 5.0f, 1.0f };
 	static const glm::mat4 models[] = {
 		{0.5f, 0.0f, 0.0f, 0.0f,
 		 0.0f, 0.5f, 0.0f, 0.0f,
@@ -302,7 +270,8 @@ void draw_init()
 		shape.index_count = static_cast<GLuint>(indices.size());
 
 		shape.generate_vertices(a[i], b[i], c[i], d[i]);
-		shape.load_texture();
+		shape.calculate_normal_matr();
+		shape.load_texture("bricks.png");
 		shapes.push_back(shape);
 	}
 
@@ -311,6 +280,16 @@ void draw_init()
 	shader.set_uniform("tex", 0);
 	shader.set_uniform("projection", glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f));
 	shader.set_uniform("view", movement::camera.get_look_at_matr());
+	shader.set_uniform("camera_pos", movement::camera.get_position());
+
+	shader.set_uniform("light.position", glm::vec4(0.4f, 0.2f, 0.3f, 0.0f));
+	shader.set_uniform("light.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader.set_uniform("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader.set_uniform("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader.set_uniform("light.atten_params", glm::vec3(1.0f, 0.007f, 0.0002f));
+	shader.set_uniform("light.direction", glm::vec3(1.0f, 0.0f, 0.0f));
+	shader.set_uniform("light.cut_off", 0.0f);
+	shader.set_uniform("light.outer_cut_off", 0.0f);
 	glEnable(GL_DEPTH_TEST);
 }
 

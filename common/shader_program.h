@@ -37,6 +37,8 @@ public:
 
 	void set_uniform(const std::string& uniform_name, GLfloat value) const;
 	void set_uniform(const std::string& uniform_name, const glm::mat4& value) const;
+	void set_uniform(const std::string& uniform_name, const glm::mat3& value) const;
+	void set_uniform(const std::string& uniform_name, const glm::vec3& value) const;
 
 private:
 	GLuint attach_shader(const std::string& shader_source, GLuint shader_type) const;
