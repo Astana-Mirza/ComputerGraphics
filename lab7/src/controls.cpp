@@ -327,7 +327,7 @@ void draw_init()
 
 		shape.generate_vertices(a[i], b[i], c[i], d[i]);
 		shape.calculate_normal_matr();
-		shape.load_texture("bricks.png");
+		shape.load_texture();
 		shapes.push_back(shape);
 	}
 
