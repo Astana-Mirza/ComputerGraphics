@@ -35,7 +35,10 @@ public:
 
 	void use() const;
 
-	void set_uniform(const std::string& uniform_name, float value) const;
+	void set_uniform(const std::string& uniform_name, GLfloat value) const;
+	void set_uniform(const std::string& uniform_name, const glm::mat3& value) const;
+	void set_uniform(const std::string& uniform_name, const glm::vec3& value) const;
+	void set_uniform(const std::string& uniform_name, const glm::vec4& value) const;
 	void set_uniform(const std::string& uniform_name, const glm::mat4& value) const;
 
 private:
